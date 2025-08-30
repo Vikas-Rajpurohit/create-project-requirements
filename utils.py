@@ -7,6 +7,11 @@ import ast
 import importlib.metadata
 import networkx as nx
 import matplotlib.pyplot as plt
+import sys
+
+STD_LIBS = sys.stdlib_module_names  
+def is_stdlib(module_name: str) -> bool:
+    return module_name in STD_LIBS
 
 IMPORTS_JSON = os.path.join(os.path.dirname(__file__), "imports.json")
 
@@ -94,6 +99,9 @@ def create_requirements(external_modules):
 
     for mod in sorted(external_modules):
         # Map import → PyPI name if known
+        if is_stdlib(mod):
+            continue
+        
         pkg = IMPORT_TO_PYPI.get(mod, mod)
 
         try:
