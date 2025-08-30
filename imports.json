@@ -3,6 +3,7 @@
     "cv2": "opencv-python",
     "sklearn": "scikit-learn",
     "bs4": "beautifulsoup4",
-    "yaml": "PyYAML"
-
+    "yaml": "PyYAML",
+    "dotenv": "python-dotenv",
+    "flask": "Flask"
 }
