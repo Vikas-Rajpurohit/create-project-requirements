@@ -19,19 +19,37 @@ def extract_zip(uploaded_file, extract_dir):
 
 
 def download_github_repo(github_url, extract_dir):
-    if github_url.endswith("/"):
-        github_url = github_url[:-1]
-    repo_name = github_url.split("/")[-1]
-    zip_url = github_url + "/archive/refs/heads/main.zip" 
-    r = requests.get(zip_url, stream=True)
-    zip_path = os.path.join(extract_dir, f"{repo_name}.zip")
-    with open(zip_path, "wb") as f:
-        f.write(r.content)
-    with zipfile.ZipFile(zip_path, "r") as zip_ref:
-        zip_ref.extractall(extract_dir)
+    try:
+        if github_url.endswith("/"):
+            github_url = github_url[:-1]
+
+        repo_name = github_url.split("/")[-1]
+        zip_url = github_url + "/archive/refs/heads/main.zip" 
+
+        # Fetch repo zip
+        r = requests.get(zip_url, stream=True, timeout=10)
+        r.raise_for_status()  # raises HTTPError if status != 200
+
+        zip_path = os.path.join(extract_dir, f"{repo_name}.zip")
+        with open(zip_path, "wb") as f:
+            f.write(r.content)
+
+        # Extract zip
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(extract_dir)
+
+        return True, f"Repository '{repo_name}' downloaded successfully."
+
+    except requests.exceptions.RequestException as e:
+        return False, f"Network error while downloading repo: {e}"
+    except zipfile.BadZipFile:
+        return False, "Downloaded file is not a valid zip archive."
+    except Exception as e:
+        return False, f"Unexpected error: {e}"
 
 
 def analyze_project(project_path):
+    print(project_path)
     py_files = []
     for root, _, files in os.walk(project_path):
         for f in files:

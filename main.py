@@ -12,7 +12,10 @@ def main():
 
     option = st.radio("Choose input method:", ["Upload ZIP", "GitHub Repo URL"])
 
-    temp_dir = tempfile.mkdtemp()
+    if "temp_dir" not in st.session_state:
+        st.session_state.temp_dir = tempfile.mkdtemp()
+
+    temp_dir = st.session_state.temp_dir
 
     if option == "Upload ZIP":
         uploaded_file = st.file_uploader("Upload a ZIP file of your project", type=["zip"])
@@ -23,8 +26,11 @@ def main():
     elif option == "GitHub Repo URL":
         github_url = st.text_input("Enter GitHub Repository URL")
         if st.button("Fetch Repo") and github_url:
-            download_github_repo(github_url, temp_dir)
-            st.success("Repository downloaded & extracted successfully!")
+            success, message = download_github_repo(github_url, temp_dir)
+            if success:
+                st.success(message)
+            else:
+                st.error(message)
 
     # Run analysis
     if os.listdir(temp_dir):
